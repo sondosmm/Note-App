@@ -10,7 +10,7 @@ const path = require('path');
 
 //connect with db
 const dbConnection= require('./config/database');
-const categoryRoute= require('./routes/categoryRoute');
+const noteRoutes= require('./routes/noteRoute');
 const authRoutes = require("./routes/authRoutes");
 const upload = require('./middleware/uploadImage');
 
@@ -39,7 +39,7 @@ if (process.env.NODE_ENV ==='development') {
 }
 
 //routers
-app.use('/api/v1/category',categoryRoute);
+app.use('/api/notes',noteRoutes);
 app.use("/api/auth", authRoutes);
 
 // app.all("*",(req,res,next)=>{
@@ -70,7 +70,7 @@ app.use((req, res, next) => {
 //global error handling middleware
 // Global error handler
 app.use((err, req, res, next) => {
-  console.error("🔥 ERROR DETAILS:", err);
+  console.error("ERROR DETAILS:", err);
 
   res.status(err.statusCode || 500).json({
     status: "error",
