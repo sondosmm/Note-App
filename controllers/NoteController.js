@@ -3,6 +3,7 @@ const slugify = require("slugify");
 const asyncHandler = require("express-async-handler");
 const fs = require("fs");
 const path = require("path");
+const ApiError = require("../utils/apiError");
 
 //@des get all categories
 // @route GET /api/v1/categories
@@ -19,11 +20,11 @@ exports.getNotes = asyncHandler(async (req, res) => {
 //@des get single category
 // @route GET /api/v1/categories/:id
 // @access Public
-exports.getNote = asyncHandler(async (req, res) => {
+exports.getNote = asyncHandler(async (req, res,next) => {
   const id = req.params.id;
   const note = await Note.findById(id);
   if (!note) {
-    res.status(404).json({ message: `no note for this id: ${id}` });
+   return next(new ApiError(`no note for this id: ${id}`,404));
   } else {
     res.status(200).json({ data: note });
   }
@@ -49,7 +50,7 @@ exports.createNote = asyncHandler(async (req, res) => {
 // @route PUT /api/v1/categories/:id
 // @access Private
 
-exports.updateNote = asyncHandler(async (req, res) => {
+exports.updateNote = asyncHandler(async (req, res,next) => {
   const { id } = req.params;
   const { title } = req.body;
   let update = {};
@@ -61,8 +62,8 @@ exports.updateNote = asyncHandler(async (req, res) => {
     update.image = `uploads/notes/${req.file.filename}`;
   }
   const note = await Note.findById(id);
-  if (!note) 
-    res.status(404).json({ message: `no note for this id: ${id}` });
+  if (!note)
+     return next(new ApiError(`no note for this id: ${id}`, 404));
 
   if (req.file && note.image) {
     const oldPath = path.join(__dirname,`../${note.image}`);
@@ -84,11 +85,11 @@ exports.updateNote = asyncHandler(async (req, res) => {
 // @route DELETE /api/v1/categories/:id
 // @access Private
 
-exports.deleteNote = asyncHandler(async(req, res) => {
+exports.deleteNote = asyncHandler(async(req, res,next) => {
   const{id}=req.params;
   const note =await Note.findById(id);
   if (!note) 
-    res.status(404).json({ message: `no note for this id: ${id}` });
+   return next(new ApiError(`no note for this id: ${id}`, 404));
 
   if (note.image) {
     const imagePath = path.join(__dirname, `../${note.image}`);

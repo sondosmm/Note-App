@@ -5,17 +5,17 @@ const asyncHandler = require("../utils/asyncHandler");
 const bcrypt = require("bcryptjs");
 // const { token } = require('morgan');
 const nodemailer = require("nodemailer");
-
+const ApiError = require("../utils/apiError");
 require("dotenv").config({ path: "./config.env" });
 
 const jwt = require("jsonwebtoken");
 
-exports.register = asyncHandler(async (req, res) => {
+exports.register = asyncHandler(async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ error: "email and password are required" });
+      return next(new ApiError("email and password are required", 400));
     }
 
     const user = await User.create({ email, password });
@@ -43,40 +43,22 @@ exports.register = asyncHandler(async (req, res) => {
     console.error("Error during registration:", err);
     const code = err.code || (err.cause && err.cause.code);
     if (code === 11000) {
-      return res.status(409).json({ error: "email already exists" });
+      return next(new ApiError("email already exists", 409));
     }
-    return res.status(500).json({ error: "registration failed" });
+    return next(new ApiError("registration failed", 500));
   }
 });
 
+exports.login = asyncHandler(async (req, res, next) => {
 
-// const transporter = nodemailer.createTransport({
-//   service: "gmail",
-//   auth: {
-//     user: process.env.EMAIL_USER,
-//     pass: process.env.EMAIL_PASSWORD,
-//   },
-//   tls: {
-//     rejectUnauthorized: false, // <-- allows self-signed certs
-//   },
-// });
-
-// await transporter.sendMail({
-//   from: process.env.EMAIL_USER,
-//   to: user.email,
-//   subject: "welcome to our website",
-//   text: "you are registered successfully",
-// });
-
-exports.login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ error: "email and password are required" });
+    return next ( new ApiError("email and password are required", 400) );
   }
   const user = await User.findOne({ email });
   if (!user || !(await bcrypt.compare(password, user.password))) {
-   return res.status(401).json({ error: "incorrect email or password" });
+   return next ( new ApiError("incorrect email or password", 401) );
   }
 
   const { accessToken, refreshToken } = generateTokens(user._id);
@@ -96,12 +78,12 @@ exports.login = asyncHandler(async (req, res) => {
  
 });
 
-exports.refresh = asyncHandler(async (req, res) => {
+exports.refresh = asyncHandler(async (req, res,next) => {
   const { refreshToken } = req.cookies;
   const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
   const tokenExist = await Token.findOne({ token: refreshToken });
   if (!tokenExist) {
-    res.status(401).json({ error: "Invalid token" });
+    return next(new ApiError("Invalid refresh token", 401));
   }
   const { accessToken, refreshToken: newRefreshToken } = generateTokens(
     decoded.id
@@ -123,6 +105,6 @@ exports.logout = asyncHandler(async (req, res) => {
   res.clearCookie("accessToken");
   res.clearCookie("refreshToken");
 
-  
-  res.status(200).json({ message: "user loged out successfully" });
+
+  res.status(200).json({ message: "user logged out successfully" });
 });

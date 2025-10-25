@@ -7,7 +7,7 @@ const ApiError = require('./utils/apiError');
 
 dotenv.config({path:'config.env'});
 const path = require('path');
-
+const globalError = require('./middleware/errorMiddleware');
 //connect with db
 const dbConnection= require('./config/database');
 const noteRoutes= require('./routes/noteRoute');
@@ -42,42 +42,18 @@ if (process.env.NODE_ENV ==='development') {
 app.use('/api/notes',noteRoutes);
 app.use("/api/auth", authRoutes);
 
-// app.all("*",(req,res,next)=>{
-// //create error and send it to error handling middleware
-// // const  err = new Error(`Can't find this route: ${req.originalUrl}`)
-// // next(err.message)
-// next(new ApiError("message",statusCode));
-// });
+
 
 
 // Handle not found routes (404)
 app.use((req, res, next) => {
-  res.status(404).json({
-    status: "fail",
-    message: `Can't find this route: ${req.originalUrl}`,
-  });
+  next(new ApiError(`Can't find this route: ${req.originalUrl}`, 400));
 });
 
-
-// Handle not found routes (404)
-app.use((req, res, next) => {
-  res.status(404).json({
-    status: "fail",
-    message: `Can't find this route: ${req.originalUrl}`,
-  });
-});
 
 //global error handling middleware
 // Global error handler
-app.use((err, req, res, next) => {
-  console.error("ERROR DETAILS:", err);
-
-  res.status(err.statusCode || 500).json({
-    status: "error",
-    message: err.message || "Something went wrong",
-    stack: err.stack, // optional — remove in production
-  });
-});
+app.use(globalError);
 
 
 
