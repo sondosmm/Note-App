@@ -63,7 +63,12 @@ exports.updateNote = asyncHandler(async (req, res,next) => {
   }
   const note = await Note.findById(id);
   if (!note)
+  {
+    if (req.file) {
+      fs.unlinkSync(req.file.path);
+    }
      return next(new ApiError(`no note for this id: ${id}`, 404));
+  }
 
   if (req.file && note.image) {
     const oldPath = path.join(__dirname,`../${note.image}`);
