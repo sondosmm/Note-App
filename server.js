@@ -8,7 +8,7 @@ const ApiError = require('./utils/apiError');
 dotenv.config({path:'config.env'});
 const path = require('path');
 const globalError = require('./middleware/errorMiddleware');
-//connect with db
+
 const dbConnection= require('./config/database');
 const noteRoutes= require('./routes/noteRoute');
 const authRoutes = require("./routes/authRoutes");
@@ -54,7 +54,6 @@ app.use((req, res, next) => {
 //global error handling middleware
 // Global error handler
 app.use(globalError);
-
 
 
 const PORT = process.env.PORT || 8000

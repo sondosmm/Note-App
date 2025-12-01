@@ -10,8 +10,6 @@ mongoose.connect(process.env.DB_URI).then((conn) => {
   })
   .catch((err) => {
     console.error(`Database Error : ${err}`);
-    // console.log("retrying in 5s");
-    // setTimeout(dbConnection,5000);
   });
 };
 module.exports = dbConnection;
