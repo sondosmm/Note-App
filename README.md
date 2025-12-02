@@ -54,7 +54,7 @@ cd RESTful-API-with-Authentication-File-Upload
 ```env
 PORT=8000
 NODE_ENV=production
-DB_URI=DB_URI=mongodb+srv://USERNAME:PASSWORD@cluster0.abcde.mongodb.net/yourdatabase
+DB_URI=mongodb+srv://USERNAME:PASSWORD@cluster0.abcde.mongodb.net/yourdatabase
 JWT_ACCESS_SECRET=your_access_secret_key_here
 JWT_REFRESH_SECRET=your_refresh_secret_key_here
 EMAIL_USER=your_gmail@gmail.com
